@@ -1,0 +1,70 @@
+<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .bg{fill:#0f1418}
+      .panel{fill:#1a252d;stroke:#3a5a6a;stroke-width:2}
+      .text{font-family:Segoe UI,Roboto,Arial,sans-serif;fill:#e6edf2;font-size:13px}
+      .title{font-size:16px;font-weight:600;fill:#e6edf2}
+      .label{font-size:11px;fill:#9fb3c0}
+      .fault{fill:#ff4d4f;stroke:#ff4d4f;stroke-width:2}
+      .detect{fill:#a855f7;stroke:#a855f7;stroke-width:2}
+      .component{fill:#2f4655;stroke:#5f8fa3;stroke-width:2}
+      .line{stroke:#5f8fa3;stroke-width:2;fill:none}
+      .stop-text{font-size:14px;font-weight:700;fill:#fff}
+    </style>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff4d4f"/>
+    </marker>
+  </defs>
+  <rect width="600" height="320" class="bg"/>
+
+  <text x="300" y="28" text-anchor="middle" class="title">Rogue Controller Stop — Fire/Smoke</text>
+
+  <!-- Fire/Smoke Controller -->
+  <g transform="translate(240,70)">
+    <rect x="0" y="0" width="120" height="90" rx="8" class="fault"/>
+    <rect x="8" y="8" width="104" height="74" rx="6" class="panel"/>
+    <text x="60" y="35" text-anchor="middle" class="text">BAS-FC</text>
+    <text x="60" y="58" text-anchor="middle" class="stop-text">STOP</text>
+    <text x="60" y="74" text-anchor="middle" class="label">Fire/ smoke ctrl</text>
+  </g>
+
+  <!-- Dampers -->
+  <g transform="translate(80,180)">
+    <rect x="0" y="0" width="120" height="80" rx="8" class="fault"/>
+    <rect x="8" y="8" width="104" height="64" rx="6" class="panel"/>
+    <text x="60" y="35" text-anchor="middle" class="text">Dampers</text>
+    <text x="60" y="58" text-anchor="middle" class="stop-text">INACTIVE</text>
+    <text x="60" y="74" text-anchor="middle" class="label">FIRE-01/DAMPER</text>
+  </g>
+  <path d="M 200 220 L 240 145" class="line"/>
+  <text x="210" y="200" text-anchor="middle" class="label">Modbus TCP</text>
+
+  <!-- Suppression -->
+  <g transform="translate(400,180)">
+    <rect x="0" y="0" width="120" height="80" rx="8" class="fault"/>
+    <rect x="8" y="8" width="104" height="64" rx="6" class="panel"/>
+    <text x="60" y="35" text-anchor="middle" class="text">Suppression</text>
+    <text x="60" y="58" text-anchor="middle" class="stop-text">OFFLINE</text>
+    <text x="60" y="74" text-anchor="middle" class="label">FIRE-01/SUPPRESS</text>
+  </g>
+  <path d="M 360 145 L 400 215" class="line"/>
+  <text x="390" y="200" text-anchor="middle" class="label">Modbus TCP</text>
+
+  <!-- Attacker -->
+  <rect x="50" y="70" width="90" height="60" rx="6" class="component"/>
+  <text x="95" y="98" text-anchor="middle" class="text">Attacker</text>
+  <text x="95" y="118" text-anchor="middle" class="label">L2 host</text>
+  <path d="M 140 100 L 240 100" class="line" stroke="#ff4d4f" stroke-width="3" stroke-dasharray="6,4" marker-end="url(#a)"/>
+  <text x="190" y="85" text-anchor="middle" class="label">stop command</text>
+
+  <!-- Detection -->
+  <rect x="430" y="60" width="140" height="70" rx="8" class="detect"/>
+  <rect x="438" y="68" width="124" height="54" rx="6" class="panel"/>
+  <text x="500" y="90" text-anchor="middle" class="text">Detection</text>
+  <text x="500" y="110" text-anchor="middle" class="label">Controller status</text>
+  <path d="M 430 95 L 360 95" class="detect"/>
+  <text x="395" y="85" text-anchor="middle" class="label">watches mode</text>
+
+  <text x="30" y="300" class="label">Impact: smoke dampers and suppression fail to respond during a fire event</text>
+</svg>

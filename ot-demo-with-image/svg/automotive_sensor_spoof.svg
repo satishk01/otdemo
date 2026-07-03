@@ -1,0 +1,77 @@
+<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .bg{fill:#0f1418}
+      .panel{fill:#1a252d;stroke:#3a5a6a;stroke-width:2}
+      .text{font-family:Segoe UI,Roboto,Arial,sans-serif;fill:#e6edf2;font-size:13px}
+      .title{font-size:16px;font-weight:600;fill:#e6edf2}
+      .label{font-size:11px;fill:#9fb3c0}
+      .fault{fill:#ff4d4f}
+      .healthy{fill:#00d084}
+      .detect{fill:#a855f7;stroke:#a855f7;stroke-width:2}
+      .arrow-bad{stroke:#ff4d4f;stroke-width:3;fill:none;stroke-dasharray:5,5;marker-end:url(#r)}
+      .arrow-fake{stroke:#00d084;stroke-width:3;fill:none;marker-end:url(#g)}
+      .arrow-detect{stroke:#a855f7;stroke-width:2;fill:none;marker-end:url(#p)}
+      .component{fill:#2f4655;stroke:#5f8fa3;stroke-width:2}
+      .robot{fill:#2f4655;stroke:#5f8fa3;stroke-width:2}
+      .spark{fill:#ff9f43;opacity:.6}
+    </style>
+    <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#00d084"/>
+    </marker>
+    <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff4d4f"/>
+    </marker>
+    <marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a855f7"/>
+    </marker>
+  </defs>
+  <rect width="600" height="320" class="bg"/>
+
+  <text x="300" y="28" text-anchor="middle" class="title">Sensor Spoofing — Weld Current</text>
+
+  <!-- Welding robot -->
+  <g transform="translate(80,80)">
+    <rect x="0" y="0" width="80" height="110" rx="8" class="robot"/>
+    <circle cx="40" cy="40" r="18" class="component"/>
+    <path d="M 40 58 L 40 95" class="line" stroke="#5f8fa3" stroke-width="4"/>
+    <circle cx="40" cy="100" r="6" class="spark"/>
+    <text x="40" y="28" text-anchor="middle" class="text">WELD-01</text>
+  </g>
+
+  <!-- Current sensor -->
+  <rect x="90" y="210" width="100" height="54" rx="8" class="component"/>
+  <text x="140" y="232" text-anchor="middle" class="text">Current sensor</text>
+  <text x="140" y="252" text-anchor="middle" class="healthy" font-size="16" font-weight="600">9.8 kA</text>
+  <path d="M 120 190 L 120 210" class="line" stroke="#5f8fa3" stroke-width="2"/>
+  <text x="140" y="180" text-anchor="middle" class="label">reported value</text>
+
+  <!-- Real vs fake split -->
+  <path d="M 190 235 C 250 235, 250 235, 300 235" class="arrow-fake"/>
+  <text x="245" y="225" text-anchor="middle" class="label">fake healthy value</text>
+  <path d="M 130 195 C 160 170, 220 170, 260 190" class="arrow-bad"/>
+  <text x="210" y="165" text-anchor="middle" class="label">real weld degrades</text>
+
+  <!-- Historian -->
+  <rect x="310" y="200" width="110" height="70" rx="8" class="component"/>
+  <text x="365" y="228" text-anchor="middle" class="text">Historian</text>
+  <text x="365" y="248" text-anchor="middle" class="healthy" font-size="16" font-weight="600">9.8 kA</text>
+  <text x="365" y="262" text-anchor="middle" class="label">L3 system</text>
+
+  <!-- Attacker -->
+  <rect x="480" y="120" width="90" height="60" rx="6" class="component"/>
+  <text x="525" y="148" text-anchor="middle" class="text">Attacker</text>
+  <text x="525" y="168" text-anchor="middle" class="label">replays value</text>
+  <path d="M 480 150 L 420 150 L 420 235 L 310 235" class="arrow-bad" stroke-dasharray="0"/>
+  <text x="450" y="135" text-anchor="middle" class="label">false data injection</text>
+
+  <!-- Detection -->
+  <rect x="310" y="80" width="140" height="70" rx="8" class="detect"/>
+  <rect x="318" y="88" width="124" height="54" rx="6" class="panel"/>
+  <text x="380" y="110" text-anchor="middle" class="text">Detection</text>
+  <text x="380" y="130" text-anchor="middle" class="label">Integrity monitor</text>
+  <path d="M 318 120 L 190 120 L 190 210" class="arrow-detect"/>
+  <text x="255" y="110" text-anchor="middle" class="label">compares real vs reported</text>
+
+  <text x="30" y="300" class="label">Impact: bad welds pass QA downstream while the dashboard shows green</text>
+</svg>

@@ -1,0 +1,84 @@
+<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .bg{fill:#0f1418}
+      .panel{fill:#1a252d;stroke:#3a5a6a;stroke-width:2}
+      .text{font-family:Segoe UI,Roboto,Arial,sans-serif;fill:#e6edf2;font-size:13px}
+      .title{font-size:16px;font-weight:600;fill:#e6edf2}
+      .label{font-size:11px;fill:#9fb3c0}
+      .fault{fill:#ff4d4f}
+      .healthy{fill:#00d084}
+      .detect{fill:#a855f7;stroke:#a855f7;stroke-width:2}
+      .component{fill:#2f4655;stroke:#5f8fa3;stroke-width:2}
+      .line{stroke:#5f8fa3;stroke-width:2;fill:none}
+      .arrow-bad{stroke:#ff4d4f;stroke-width:3;fill:none;stroke-dasharray:5,5;marker-end:url(#r)}
+      .arrow-fake{stroke:#00d084;stroke-width:3;fill:none;marker-end:url(#g)}
+      .arrow-detect{stroke:#a855f7;stroke-width:2;fill:none;marker-end:url(#p)}
+    </style>
+    <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#00d084"/>
+    </marker>
+    <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff4d4f"/>
+    </marker>
+    <marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a855f7"/>
+    </marker>
+  </defs>
+  <rect width="600" height="320" class="bg"/>
+
+  <text x="300" y="28" text-anchor="middle" class="title">Sensor Spoofing — Smoke Density</text>
+
+  <!-- Building floor with smoke -->
+  <g transform="translate(60,120)">
+    <rect x="0" y="0" width="160" height="120" rx="8" class="component"/>
+    <rect x="15" y="15" width="35" height="35" class="panel"/>
+    <rect x="60" y="15" width="35" height="35" class="panel"/>
+    <rect x="105" y="15" width="35" height="35" class="panel"/>
+    <rect x="15" y="65" width="35" height="35" class="panel"/>
+    <rect x="60" y="65" width="35" height="35" class="panel"/>
+    <rect x="105" y="65" width="35" height="35" class="panel"/>
+    <text x="80" y="112" text-anchor="middle" class="label">Floor with smoke</text>
+    <!-- smoke clouds -->
+    <circle cx="40" cy="40" r="14" fill="#ff4d4f" opacity="0.25"/>
+    <circle cx="90" cy="80" r="18" fill="#ff4d4f" opacity="0.25"/>
+    <circle cx="130" cy="50" r="12" fill="#ff4d4f" opacity="0.25"/>
+  </g>
+
+  <!-- Smoke detector -->
+  <rect x="100" y="60" width="90" height="50" rx="8" class="component"/>
+  <text x="145" y="80" text-anchor="middle" class="text">Smoke det.</text>
+  <text x="145" y="98" text-anchor="middle" class="healthy" font-size="15" font-weight="600">2.0 %/m</text>
+  <text x="145" y="55" text-anchor="middle" class="label">FIRE-01/SMOKE</text>
+
+  <!-- Fire panel -->
+  <rect x="320" y="180" width="120" height="70" rx="8" class="component"/>
+  <text x="380" y="208" text-anchor="middle" class="text">Fire panel</text>
+  <text x="380" y="228" text-anchor="middle" class="text">BAS-FC</text>
+  <text x="380" y="242" text-anchor="middle" class="label">Modbus TCP</text>
+
+  <!-- Fake value arrow -->
+  <path d="M 190 85 C 240 85, 240 85, 320 205" class="arrow-fake"/>
+  <text x="245" y="125" text-anchor="middle" class="label">fake healthy reading</text>
+
+  <!-- Real smoke arrow -->
+  <path d="M 140 110 C 180 140, 240 140, 320 210" class="arrow-bad"/>
+  <text x="230" y="160" text-anchor="middle" class="label">real smoke condition</text>
+
+  <!-- Attacker -->
+  <rect x="480" y="180" width="90" height="60" rx="6" class="component"/>
+  <text x="525" y="208" text-anchor="middle" class="text">Attacker</text>
+  <text x="525" y="228" text-anchor="middle" class="label">replays value</text>
+  <path d="M 480 210 L 440 210" class="arrow-bad" stroke-dasharray="0"/>
+  <text x="460" y="200" text-anchor="middle" class="label">injection</text>
+
+  <!-- Detection -->
+  <rect x="320" y="60" width="140" height="70" rx="8" class="detect"/>
+  <rect x="328" y="68" width="124" height="54" rx="6" class="panel"/>
+  <text x="390" y="90" text-anchor="middle" class="text">Detection</text>
+  <text x="390" y="110" text-anchor="middle" class="label">Integrity monitor</text>
+  <path d="M 328 95 L 190 95" class="arrow-detect"/>
+  <text x="260" y="80" text-anchor="middle" class="label">flatline signature</text>
+
+  <text x="30" y="300" class="label">Impact: fire panel sees green while real smoke endangers occupants</text>
+</svg>

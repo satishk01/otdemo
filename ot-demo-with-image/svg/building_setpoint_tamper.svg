@@ -1,0 +1,76 @@
+<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .bg{fill:#0f1418}
+      .panel{fill:#1a252d;stroke:#3a5a6a;stroke-width:2}
+      .text{font-family:Segoe UI,Roboto,Arial,sans-serif;fill:#e6edf2;font-size:13px}
+      .title{font-size:16px;font-weight:600;fill:#e6edf2}
+      .label{font-size:11px;fill:#9fb3c0}
+      .fault{fill:#ff4d4f;stroke:#ff4d4f;stroke-width:2}
+      .fault-anim{fill:#ff4d4f;animation:pulse 1s ease-in-out infinite}
+      .detect{fill:#a855f7;stroke:#a855f7;stroke-width:2}
+      .component{fill:#2f4655;stroke:#5f8fa3;stroke-width:2}
+      .line{stroke:#5f8fa3;stroke-width:2;fill:none}
+      .arrow{stroke:#ff9f43;stroke-width:3;fill:none;stroke-dasharray:6,4;marker-end:url(#a)}
+      .building{fill:#2f4655;stroke:#5f8fa3;stroke-width:2}
+      @keyframes pulse{0%,100%{opacity:.7}50%{opacity:1}}
+    </style>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff9f43"/>
+    </marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a855f7"/>
+    </marker>
+  </defs>
+  <rect width="600" height="320" class="bg"/>
+
+  <text x="300" y="28" text-anchor="middle" class="title">Setpoint Tampering — HVAC Supply Air</text>
+
+  <!-- Building -->
+  <g transform="translate(60,140)">
+    <rect x="0" y="0" width="140" height="130" rx="6" class="building"/>
+    <rect x="15" y="20" width="28" height="28" class="panel"/>
+    <rect x="55" y="20" width="28" height="28" class="panel"/>
+    <rect x="95" y="20" width="28" height="28" class="panel"/>
+    <rect x="15" y="70" width="28" height="28" class="panel"/>
+    <rect x="55" y="70" width="28" height="28" class="panel"/>
+    <rect x="95" y="70" width="28" height="28" class="panel"/>
+    <text x="70" y="122" text-anchor="middle" class="label">Tenant spaces</text>
+  </g>
+
+  <!-- Duct -->
+  <path d="M 200 205 L 360 205" class="line" stroke-width="24"/>
+  <path d="M 200 205 L 360 205" class="line" stroke="#ff9f43" stroke-width="24" stroke-dasharray="12,8" opacity="0.4"/>
+  <text x="280" y="200" text-anchor="middle" class="label">hot supply air</text>
+
+  <!-- AHU -->
+  <g transform="translate(360,145)">
+    <rect x="0" y="0" width="120" height="90" rx="8" class="fault-anim"/>
+    <rect x="8" y="8" width="104" height="74" rx="6" class="panel"/>
+    <text x="60" y="35" text-anchor="middle" class="text">AHU-01</text>
+    <text x="60" y="58" text-anchor="middle" class="fault" font-size="18" font-weight="600">35°C</text>
+    <text x="60" y="76" text-anchor="middle" class="label">supply air</text>
+  </g>
+
+  <!-- Controller -->
+  <rect x="440" y="60" width="100" height="70" rx="6" class="component"/>
+  <text x="490" y="88" text-anchor="middle" class="text">BAS-MFC</text>
+  <text x="490" y="108" text-anchor="middle" class="label">BACnet/IP</text>
+  <path d="M 440 95 L 420 95 L 420 170 L 390 170" class="line"/>
+
+  <!-- Attacker -->
+  <rect x="480" y="250" width="90" height="60" rx="6" class="component"/>
+  <text x="525" y="278" text-anchor="middle" class="text">Attacker</text>
+  <text x="525" y="298" text-anchor="middle" class="label">L2 host</text>
+  <path d="M 490 250 L 490 180 L 470 180" class="arrow"/>
+  <text x="525" y="220" text-anchor="middle" class="label">writes setpoint</text>
+
+  <!-- Detection -->
+  <rect x="210" y="50" width="140" height="70" rx="8" class="detect"/>
+  <rect x="218" y="58" width="124" height="54" rx="6" class="panel"/>
+  <text x="280" y="80" text-anchor="middle" class="text">Detection</text>
+  <text x="280" y="100" text-anchor="middle" class="label">AHU temp sensor</text>
+  <path d="M 280 120 L 280 195" class="detect" stroke-width="2" marker-end="url(#b)"/>
+
+  <text x="30" y="300" class="label">Impact: spaces overheat past 26°C comfort/safety limit</text>
+</svg>

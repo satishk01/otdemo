@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vehicle Body Line · OT Control &amp; Security Demo</title>
+<style>
+  /* ── Control-room design system ──────────────────────────────────────────
+     Subject: an automotive body-in-white → paint → assembly cell HMI.
+     Palette is drawn from real plant control panels: deep slate steel,
+     phosphor amber for live data, signal green/red for state. Data is the
+     hero, so the telemetry face is a tabular monospace, used large. */
+  :root{
+    --steel-900:#0e1418;   /* panel backdrop */
+    --steel-800:#151d23;   /* card */
+    --steel-700:#1d272e;   /* raised */
+    --steel-600:#28353d;   /* borders */
+    --line:#33444d;
+    --ink:#dfe8ec;
+    --ink-dim:#7e929c;
+    --amber:#ffb022;       /* live phosphor value */
+    --amber-dim:#8a6320;
+    --green:#4fd08a;       /* ok / running */
+    --red:#ff5468;         /* alarm */
+    --yellow:#ffd23d;      /* warn */
+    --violet:#b98bff;      /* security accent */
+    --mono:'DM Mono',ui-monospace,'SFMono-Regular','JetBrains Mono',Menlo,Consolas,monospace;
+    --sans:'Sora',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:
+      radial-gradient(1200px 500px at 80% -10%, #16222a 0%, transparent 60%),
+      var(--steel-900);
+    color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;
+    min-height:100vh;
+  }
+  .wrap{max-width:1280px;margin:0 auto;padding:0 22px 60px}
+
+  /* header / status bar */
+  header{
+    display:flex;align-items:center;gap:18px;padding:18px 22px;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#131b21,#0e1418);position:sticky;top:0;z-index:20;
+  }
+  .brand{display:flex;flex-direction:column;line-height:1.15}
+  .brand .k{font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--amber);text-transform:uppercase}
+  .brand .t{font-weight:650;font-size:17px;letter-spacing:-.01em}
+  header .sp{flex:1}
+  .pill{font-family:var(--mono);font-size:12px;padding:5px 11px;border:1px solid var(--line);border-radius:999px;color:var(--ink-dim);display:flex;align-items:center;gap:7px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+  .dot.stale{background:var(--ink-dim);box-shadow:none}
+  .clock{font-family:var(--mono);color:var(--ink)}
+  .mode-toggle{display:flex;align-items:center;gap:6px;background:var(--steel-800);border:1px solid var(--line);border-radius:999px;padding:3px}
+  .mode-btn{font-family:var(--mono);font-size:11px;letter-spacing:.05em;padding:5px 11px;border-radius:999px;border:0;background:transparent;color:var(--ink-dim);cursor:pointer;transition:.14s}
+  .mode-btn.active{background:var(--violet);color:#fff}
+  .mode-btn:hover:not(.active){color:var(--ink)}
+
+  /* section headings */
+  .sh{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim);
+      margin:30px 0 14px;display:flex;align-items:center;gap:10px}
+  .sh::after{content:"";flex:1;height:1px;background:var(--line)}
+  .sh .badge{color:var(--violet);border:1px solid var(--steel-600);border-radius:4px;padding:1px 7px;font-size:10px;letter-spacing:.1em}
+
+  /* KPI strip */
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-top:22px}
+  .kpi{background:var(--steel-800);border:1px solid var(--steel-600);border-radius:10px;padding:14px 15px}
+  .kpi .l{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim)}
+  .kpi .v{font-family:var(--mono);font-size:26px;font-weight:500;margin-top:6px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .kpi .v.amber{color:var(--amber)}
+  .kpi .v.green{color:var(--green)}
+  .kpi .v.red{color:var(--red)}
+  .kpi .u{font-size:13px;color:var(--ink-dim)}
+
+  /* mimic diagram: station tiles */
+  .line{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:900px){.line{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,1fr)}}
+  .station{background:var(--steel-800);border:1px solid var(--steel-600);border-radius:12px;padding:15px 16px;position:relative;overflow:hidden}
+  .station::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green)}
+  .station.alarm::before{background:var(--red);animation:pulse 1s ease-in-out infinite}
+  .station.fault::before{background:var(--ink-dim)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .st-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:12px}
+  .st-name{font-weight:600;font-size:15px}
+  .st-id{font-family:var(--mono);font-size:11px;color:var(--ink-dim)}
+  .st-state{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:5px;text-transform:uppercase;letter-spacing:.08em}
+  .st-state.running{color:var(--green);background:rgba(79,208,138,.1)}
+  .st-state.fault{color:var(--ink-dim);background:rgba(126,146,156,.12)}
+  .sensor{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--steel-700)}
+  .sensor:first-of-type{border-top:0}
+  .s-label{font-size:13px;color:var(--ink-dim)}
+  .s-tag{font-family:var(--mono);font-size:10px;color:#5b6d76}
+  .s-read{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+  .s-val{font-size:19px;color:var(--amber);font-weight:500}
+  .s-val.warn{color:var(--yellow)}
+  .s-val.alarm{color:var(--red);text-shadow:0 0 12px rgba(255,84,104,.5)}
+  .s-unit{font-size:11px;color:var(--ink-dim);margin-left:3px}
+  .s-bar{grid-column:1/-1;height:3px;background:var(--steel-700);border-radius:2px;position:relative;margin-top:2px}
+  .s-fill{position:absolute;top:0;bottom:0;left:0;background:var(--amber-dim);border-radius:2px;transition:width .4s ease}
+  .s-fill.alarm{background:var(--red)}
+  .s-sp{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-dim)}
+
+  /* two-column lower area */
+  .cols{display:grid;grid-template-columns:1.15fr .85fr;gap:22px;align-items:start}
+  @media(max-width:900px){.cols{grid-template-columns:1fr}}
+
+  /* security overlay: purdue stack */
+  .purdue{background:var(--steel-800);border:1px solid var(--steel-600);border-radius:12px;overflow:hidden}
+  .plevel{padding:11px 15px;border-top:1px solid var(--steel-700);display:flex;align-items:center;gap:12px}
+  .plevel:first-child{border-top:0}
+  .plevel .pn{font-family:var(--mono);font-size:11px;color:var(--violet);min-width:64px}
+  .plevel .pt{font-size:13px;color:var(--ink);flex:1}
+  .plevel .pc{font-family:var(--mono);font-size:11px;color:var(--ink-dim)}
+  .boundary{padding:8px 15px;background:#11181d;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);
+            font-family:var(--mono);font-size:11px;display:flex;align-items:center;gap:8px}
+  .boundary .risk{padding:1px 7px;border-radius:4px;font-size:10px;letter-spacing:.05em;text-transform:uppercase}
+  .risk.critical{color:var(--red);background:rgba(255,84,104,.12)}
+  .risk.high{color:var(--yellow);background:rgba(255,210,61,.12)}
+  .risk.medium{color:var(--amber);background:rgba(255,176,34,.1)}
+  .risk.low{color:var(--green);background:rgba(79,208,138,.1)}
+
+  /* attack console */
+  .console{background:var(--steel-800);border:1px solid var(--steel-600);border-radius:12px;padding:16px}
+  .console h3{margin:0 0 4px;font-size:14px;font-weight:600}
+  .console .note{font-size:12px;color:var(--ink-dim);margin-bottom:14px}
+  .atk{width:100%;text-align:left;background:var(--steel-700);border:1px solid var(--steel-600);color:var(--ink);
+       border-radius:9px;padding:11px 13px;margin-bottom:9px;cursor:pointer;transition:.14s;font-family:inherit}
+  .atk:hover{border-color:var(--violet);background:#22303a}
+  .atk .at{font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px}
+  .atk .stride{font-family:var(--mono);font-size:10px;color:var(--violet);border:1px solid var(--steel-600);border-radius:4px;padding:1px 6px;text-transform:uppercase;letter-spacing:.05em}
+  .atk .ad{font-size:11.5px;color:var(--ink-dim);margin-top:5px;line-height:1.45}
+  .clr{width:100%;background:transparent;border:1px solid var(--steel-600);color:var(--ink-dim);border-radius:9px;
+       padding:10px;cursor:pointer;font-family:var(--mono);font-size:12px;letter-spacing:.05em;transition:.14s}
+  .clr:hover{border-color:var(--green);color:var(--green)}
+
+  /* detections + event log */
+  .feed{background:var(--steel-800);border:1px solid var(--steel-600);border-radius:12px;padding:6px 0;max-height:340px;overflow:auto}
+  .det{padding:9px 15px;border-top:1px solid var(--steel-700);display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:start}
+  .det:first-child{border-top:0}
+  .det .sev{font-family:var(--mono);font-size:9.5px;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.05em;margin-top:1px;white-space:nowrap}
+  .sev.critical{color:var(--red);background:rgba(255,84,104,.14)}
+  .sev.high{color:var(--yellow);background:rgba(255,210,61,.12)}
+  .det .dr{font-size:12.5px;font-weight:600}
+  .det .dd{font-family:var(--mono);font-size:11px;color:var(--ink-dim);margin-top:2px;line-height:1.5}
+  .det .dt{font-family:var(--mono);font-size:10px;color:#5b6d76}
+  .empty{padding:26px 15px;text-align:center;color:var(--ink-dim);font-size:13px}
+
+  .log{background:var(--steel-800);border:1px solid var(--steel-600);border-radius:12px;padding:6px 0;max-height:260px;overflow:auto;font-family:var(--mono);font-size:11.5px}
+  .logrow{padding:5px 15px;display:flex;gap:10px;color:var(--ink-dim);border-top:1px solid #131a1f}
+  .logrow:first-child{border-top:0}
+  .logrow .lt{color:#566a73;min-width:52px}
+  .logrow.security{color:var(--ink)}
+  .logrow.warn .lm{color:var(--yellow)}
+  .logrow.high .lm,.logrow.critical .lm{color:var(--red)}
+
+  .banner{margin-top:16px;padding:10px 15px;border:1px solid var(--amber-dim);background:rgba(255,176,34,.06);
+           border-radius:9px;font-size:12px;color:var(--amber);display:none;align-items:center;gap:9px;font-family:var(--mono)}
+  .banner.on{display:flex}
+  .pitch{margin-top:18px;background:var(--steel-800);border:1px solid var(--steel-600);border-radius:12px;padding:16px 18px}
+  .pitch h2{margin:0 0 6px;font-size:15px;font-weight:600}
+  .pitch p{margin:0;font-size:13px;color:var(--ink-dim);line-height:1.55}
+  .pitch .tags{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .tag{font-family:var(--mono);font-size:10px;padding:3px 9px;border:1px solid var(--steel-600);border-radius:999px;color:var(--ink-dim)}
+  .diagram{background:var(--steel-800);border:1px solid var(--steel-600);border-radius:12px;padding:18px;display:block}
+  .diagram-item{margin-bottom:22px;text-align:center}
+  .diagram-item:last-child{margin-bottom:0}
+  .diagram-item .dt{font-size:12px;color:var(--ink-dim);margin-bottom:8px}
+  .diagram img{width:100%;max-width:850px;height:auto;border-radius:8px;background:#0f1418;display:block;margin:0 auto}
+  .diagram .placeholder{color:var(--ink-dim);font-size:13px;padding:30px 0;text-align:center}
+  .disclaimer{margin-top:34px;font-size:11.5px;color:#566a73;text-align:center;font-family:var(--mono);line-height:1.6}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="k">Plant OT · Live</span>
+    <span class="t" id="brandTitle">Vehicle Body Line — Cell 7</span>
+  </div>
+  <div class="sp"></div>
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="btnAuto" onclick="setMode('automotive')">Automotive</button>
+    <button class="mode-btn" id="btnBldg" onclick="setMode('building')">Smart Building</button>
+  </div>
+  <div class="pill"><span class="clock" id="clock">t+00:00</span></div>
+  <div class="pill"><span class="dot" id="livedot"></span><span id="livetxt">streaming</span></div>
+</header>
+
+<div class="wrap">
+
+  <div class="banner" id="atkBanner">⚠ ACTIVE OT ATTACK — <span id="atkBannerTxt"></span></div>
+
+  <div class="pitch" id="pitch">
+    <h2 id="pitchTitle">Automotive manufacturing</h2>
+    <p id="pitchText">A vehicle body-in-white → paint → assembly cell. Use the attack console to show how an unauthenticated control network lets an attacker tamper with recipes, spoof weld-quality readings, or stop the line.</p>
+    <div class="tags" id="pitchTags">
+      <span class="tag">EtherNet/IP</span>
+      <span class="tag">PROFINET</span>
+      <span class="tag">PLC-level attacks</span>
+    </div>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="sh">Line mimic — real-time station telemetry</div>
+  <div class="line" id="line"></div>
+
+  <div class="sh">Fault diagrams <span id="diagramCount" class="badge" style="display:none"></span></div>
+  <div class="diagram" id="diagram">
+    <div id="diagramList"></div>
+    <div class="placeholder" id="diagramPlaceholder">No active fault. Select an attack above to see the fault diagrams.</div>
+  </div>
+
+  <div class="cols" style="margin-top:8px">
+    <div>
+      <div class="sh">Security overlay <span class="badge">threat model</span></div>
+      <div class="purdue" id="purdue"></div>
+
+      <div class="sh">Detections</div>
+      <div class="feed" id="dets"><div class="empty">No anomalies. Line integrity nominal.</div></div>
+    </div>
+
+    <div>
+      <div class="sh">Attack console <span class="badge">demo</span></div>
+      <div class="console">
+        <h3>Inject a simulated OT attack</h3>
+        <div class="note">Each button mutates the simulated control network — watch the mimic and Detections react live. Nothing here touches a real device.</div>
+        <div id="atkButtons"></div>
+        <button class="clr" onclick="clearAttacks()">↺ Restore line to nominal</button>
+      </div>
+
+      <div class="sh">Event log</div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    Fully simulated environment · No physical controller, fieldbus, or device is contacted.<br>
+    Built to demonstrate OT visibility and the control-network attack surface for security review.
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let SEC = null;
+let MODE = 'automotive';
+let es = null;
+let lastMsg = 0;
+
+const PITCH = {
+  automotive: {
+    title: 'Automotive manufacturing',
+    text: 'A vehicle body-in-white → paint → assembly cell. Use the attack console to show how an unauthenticated control network lets an attacker tamper with recipes, spoof weld-quality readings, or stop the line.',
+    tags: ['EtherNet/IP', 'PROFINET', 'PLC-level attacks'],
+    brand: 'Vehicle Body Line — Cell 7'
+  },
+  building: {
+    title: 'Smart building / BAS',
+    text: 'An HVAC, fire-safety, and access-control environment for a commercial campus. Use the attack console to show how a flat BACnet/Modbus control network lets an attacker overheat air handlers, fake healthy smoke readings, or stop the fire/smoke controller.',
+    tags: ['BACnet/IP', 'Modbus TCP', 'BMS controller attacks'],
+    brand: 'Smart Campus — Building Systems'
+  }
+};
+
+function modeQuery() { return '?mode=' + MODE; }
+
+function connectStream(){
+  if(es) es.close();
+  es = new EventSource('/api/stream' + modeQuery());
+  es.onmessage = (e) => { lastMsg = Date.now(); render(JSON.parse(e.data)); };
+  es.onerror = () => setLive(false);
+}
+
+function setMode(mode){
+  if(mode === MODE) return;
+  MODE = mode;
+  $('btnAuto').classList.toggle('active', mode === 'automotive');
+  $('btnBldg').classList.toggle('active', mode === 'building');
+  const p = PITCH[mode];
+  $('brandTitle').textContent = p.brand;
+  $('pitchTitle').textContent = p.title;
+  $('pitchText').textContent = p.text;
+  $('pitchTags').innerHTML = p.tags.map(t => `<span class="tag">${t}</span>`).join('');
+  // reload security model and stream for new mode
+  fetch('/api/security' + modeQuery()).then(r => r.json()).then(sec => {
+    SEC = sec;
+    renderSecurity(sec);
+    renderAttackButtons(sec);
+  });
+  connectStream();
+}
+
+// ── load static security model once ──────────────────────────────────────
+fetch('/api/security' + modeQuery()).then(r => r.json()).then(sec => { SEC = sec; renderSecurity(sec); renderAttackButtons(sec); });
+
+// ── live stream ──────────────────────────────────────────────────────────
+connectStream();
+setInterval(() => setLive(Date.now() - lastMsg < 2500), 1000);
+
+function setLive(ok){
+  $('livedot').classList.toggle('stale', !ok);
+  $('livetxt').textContent = ok ? 'streaming' : 'reconnecting…';
+}
+
+function fmtClock(t){
+  const m = Math.floor(t/60), s = Math.floor(t%60);
+  return `t+${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function render(d){
+  $('clock').textContent = fmtClock(d.t);
+  renderKpis(d.kpis);
+  renderLine(d.stations);
+  renderDetections(d.detections);
+  renderLog(d.events);
+  renderBanner(d.active_attacks);
+  renderDiagram(d.active_attacks);
+}
+
+function renderKpis(k){
+  const cells = [
+    ['OEE', k.oee, '%', k.oee >= 80 ? 'green' : k.oee >= 55 ? 'amber' : 'red'],
+    ['Availability', k.availability, '%', k.faulted_stations ? 'red' : 'green'],
+    ['Quality', k.quality, '%', k.quality >= 95 ? 'green' : 'amber'],
+    ['Throughput', k.throughput_units, ' units', 'amber'],
+    ['Active alarms', k.active_alarms, '', k.active_alarms ? 'red' : 'green'],
+    ['Faulted', k.faulted_stations, '', k.faulted_stations ? 'red' : 'green'],
+  ];
+  $('kpis').innerHTML = cells.map(([l,v,u,c]) =>
+    `<div class="kpi"><div class="l">${l}</div><div class="v ${c}">${v}<span class="u">${u}</span></div></div>`).join('');
+}
+
+function renderLine(stations){
+  $('line').innerHTML = stations.map(st => {
+    const anyAlarm = st.sensors.some(s => s.status === 'alarm');
+    const cls = st.state === 'fault' ? 'fault' : anyAlarm ? 'alarm' : '';
+    const sensors = st.sensors.map(s => {
+      const pct = Math.max(0, Math.min(100, ((s.value - s.lo)/((s.hi - s.lo)||1))*100));
+      const sppct = Math.max(0, Math.min(100, ((s.setpoint - s.lo)/((s.hi - s.lo)||1))*100));
+      return `<div class="sensor">
+        <div><div class="s-label">${s.label}</div><div class="s-tag">${s.tag}</div></div>
+        <div class="s-read"><span class="s-val ${s.status}">${s.value.toFixed(2)}</span><span class="s-unit">${s.unit}</span></div>
+        <div class="s-bar"><div class="s-fill ${s.status==='alarm'?'alarm':''}" style="width:${pct}%"></div><div class="s-sp" style="left:${sppct}%"></div></div>
+      </div>`;
+    }).join('');
+    return `<div class="station ${cls}">
+      <div class="st-h">
+        <div><span class="st-name">${st.name}</span> <span class="st-id">${st.id}</span></div>
+        <span class="st-state ${st.state}">${st.state}</span>
+      </div>${sensors}
+    </div>`;
+  }).join('');
+}
+
+function renderDetections(dets){
+  if(!dets.length){ $('dets').innerHTML = '<div class="empty">No anomalies. Line integrity nominal.</div>'; return; }
+  $('dets').innerHTML = dets.map(d =>
+    `<div class="det">
+       <span class="sev ${d.severity}">${d.severity}</span>
+       <div><div class="dr">${d.rule} <span class="dt">· ${d.asset} · t+${d.ts}s</span></div><div class="dd">${d.detail}</div></div>
+     </div>`).join('');
+}
+
+function renderLog(events){
+  $('log').innerHTML = events.map(e =>
+    `<div class="logrow ${e.source} ${e.level}"><span class="lt">${e.ts}s</span><span class="lm">${e.msg}</span></div>`).join('');
+}
+
+function renderBanner(attacks){
+  const on = attacks && attacks.length;
+  $('atkBanner').classList.toggle('on', !!on);
+  if(on) $('atkBannerTxt').textContent = attacks.map(a => a.title).join('  ·  ');
+}
+
+function renderDiagram(attacks){
+  const kinds = ['setpoint_tamper','sensor_spoof','plc_stop'];
+  const active = (attacks || []).filter(a => kinds.includes(a.kind));
+  const count = $('diagramCount');
+  const list = $('diagramList');
+  const placeholder = $('diagramPlaceholder');
+  if(active.length){
+    count.style.display = 'inline';
+    count.textContent = active.length;
+    placeholder.style.display = 'none';
+    const html = active.map(a =>
+      `<div class="diagram-item">
+         <div class="dt">${a.title}</div>
+         <img src="/svg/${MODE}_${a.kind}.svg" alt="${a.title}">
+       </div>`).join('');
+    if(list.innerHTML !== html) list.innerHTML = html;
+  } else {
+    count.style.display = 'none';
+    count.textContent = '';
+    list.innerHTML = '';
+    placeholder.style.display = 'block';
+  }
+}
+
+// ── security overlay ─────────────────────────────────────────────────────
+function renderSecurity(sec){
+  // order: 4 (top / enterprise) down to 0 (field). Interleave boundaries.
+  const order = [4, 35, 2, 1, 0];
+  const byLvl = {};
+  sec.assets.forEach(a => { (byLvl[a.purdue] = byLvl[a.purdue] || []).push(a); });
+  const bMap = {}; sec.trust_boundaries.forEach(b => { bMap[b.from] = b; });
+
+  let html = '';
+  order.forEach(lvl => {
+    const name = sec.purdue_levels[lvl];
+    const assets = byLvl[lvl] || [];
+    const count = assets.length;
+    html += `<div class="plevel">
+      <span class="pn">L${lvl===35?'3.5':lvl}</span>
+      <span class="pt">${name.split('· ')[1] || name}</span>
+      <span class="pc">${count} asset${count===1?'':'s'}</span>
+    </div>`;
+    const b = bMap[name];
+    if(b) html += `<div class="boundary"><span class="risk ${b.risk}">${b.risk}</span> ${b.control} — ${b.note}</div>`;
+  });
+  $('purdue').innerHTML = html;
+}
+
+function renderAttackButtons(sec){
+  const demoable = sec.attack_surface.filter(a => a.demo);
+  $('atkButtons').innerHTML = demoable.map(a =>
+    `<button class="atk" onclick="injectAttack('${a.demo}')">
+       <span class="at"><span class="stride">${a.stride}</span> ${a.target}</span>
+       <span class="ad">${a.scenario}</span>
+     </button>`).join('');
+}
+
+function injectAttack(kind){ fetch('/api/attack/'+kind + modeQuery(), {method:'POST'}); }
+function clearAttacks(){ fetch('/api/clear' + modeQuery(), {method:'POST'}); }
+</script>
+</body>
+</html>

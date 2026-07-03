@@ -1,0 +1,71 @@
+<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .bg{fill:#0f1418}
+      .panel{fill:#1a252d;stroke:#3a5a6a;stroke-width:2}
+      .text{font-family:Segoe UI,Roboto,Arial,sans-serif;fill:#e6edf2;font-size:13px}
+      .title{font-size:16px;font-weight:600;fill:#e6edf2}
+      .label{font-size:11px;fill:#9fb3c0}
+      .fault{fill:#ff4d4f;stroke:#ff4d4f;stroke-width:2}
+      .healthy{fill:#00d084;stroke:#00d084;stroke-width:2}
+      .detect{fill:#a855f7;stroke:#a855f7;stroke-width:2}
+      .component{fill:#2f4655;stroke:#5f8fa3;stroke-width:2}
+      .line{stroke:#5f8fa3;stroke-width:2;fill:none}
+      .stop{fill:#ff4d4f}
+      .stop-text{font-size:14px;font-weight:700;fill:#fff}
+    </style>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff4d4f"/>
+    </marker>
+  </defs>
+  <rect width="600" height="320" class="bg"/>
+
+  <text x="300" y="28" text-anchor="middle" class="title">Rogue PLC Stop — Final Assembly</text>
+
+  <!-- PLC -->
+  <g transform="translate(240,90)">
+    <rect x="0" y="0" width="120" height="80" rx="8" class="fault"/>
+    <rect x="8" y="8" width="104" height="64" rx="6" class="panel"/>
+    <text x="60" y="35" text-anchor="middle" class="text">PLC-ASM</text>
+    <text x="60" y="54" text-anchor="middle" class="stop-text">STOP</text>
+  </g>
+
+  <!-- Torque station -->
+  <g transform="translate(60,170)">
+    <rect x="0" y="0" width="140" height="100" rx="8" class="fault"/>
+    <rect x="8" y="8" width="124" height="84" rx="6" class="panel"/>
+    <text x="70" y="35" text-anchor="middle" class="text">TORQ-05</text>
+    <text x="70" y="58" text-anchor="middle" class="stop-text">FAULT</text>
+    <text x="70" y="80" text-anchor="middle" class="label">Powertrain torque</text>
+  </g>
+  <path d="M 240 160 L 180 170" class="line"/>
+  <text x="210" y="150" text-anchor="middle" class="label">PROFINET</text>
+
+  <!-- Conveyor station -->
+  <g transform="translate(400,170)">
+    <rect x="0" y="0" width="140" height="100" rx="8" class="fault"/>
+    <rect x="8" y="8" width="124" height="84" rx="6" class="panel"/>
+    <text x="70" y="35" text-anchor="middle" class="text">CONV-06</text>
+    <text x="70" y="58" text-anchor="middle" class="stop-text">FAULT</text>
+    <text x="70" y="80" text-anchor="middle" class="label">Main conveyor</text>
+  </g>
+  <path d="M 360 160 L 400 190" class="line"/>
+  <text x="390" y="150" text-anchor="middle" class="label">PROFINET</text>
+
+  <!-- Attacker -->
+  <rect x="30" y="90" width="90" height="60" rx="6" class="component"/>
+  <text x="75" y="118" text-anchor="middle" class="text">Attacker</text>
+  <text x="75" y="138" text-anchor="middle" class="label">L2 host</text>
+  <path d="M 120 120 L 240 120" class="line" stroke="#ff4d4f" stroke-width="3" stroke-dasharray="6,4" marker-end="url(#a)"/>
+  <text x="180" y="105" text-anchor="middle" class="label">stop command</text>
+
+  <!-- Detection -->
+  <rect x="430" y="80" width="140" height="70" rx="8" class="detect"/>
+  <rect x="438" y="88" width="124" height="54" rx="6" class="panel"/>
+  <text x="500" y="110" text-anchor="middle" class="text">Detection</text>
+  <text x="500" y="130" text-anchor="middle" class="label">PLC status monitor</text>
+  <path d="M 430 115 L 360 115" class="detect"/>
+  <text x="395" y="105" text-anchor="middle" class="label">watches mode</text>
+
+  <text x="30" y="300" class="label">Impact: torque and conveyor stations halt; line goes down</text>
+</svg>

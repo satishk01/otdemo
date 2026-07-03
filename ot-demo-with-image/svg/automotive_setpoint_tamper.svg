@@ -1,0 +1,62 @@
+<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .bg{fill:#0f1418}
+      .panel{fill:#1a252d;stroke:#3a5a6a;stroke-width:2}
+      .text{font-family:Segoe UI,Roboto,Arial,sans-serif;fill:#e6edf2;font-size:13px}
+      .title{font-size:16px;font-weight:600;fill:#e6edf2}
+      .label{font-size:11px;fill:#9fb3c0}
+      .fault{fill:#ff4d4f;stroke:#ff4d4f;stroke-width:2}
+      .fault-anim{fill:#ff4d4f;animation:pulse 1s ease-in-out infinite}
+      .healthy{fill:#00d084;stroke:#00d084;stroke-width:2}
+      .detect{fill:#a855f7;stroke:#a855f7;stroke-width:2}
+      .arrow{stroke:#ff9f43;stroke-width:3;fill:none;stroke-dasharray:6,4;marker-end:url(#a)}
+      .line{stroke:#5f8fa3;stroke-width:2;fill:none}
+      .component{fill:#2f4655;stroke:#5f8fa3;stroke-width:2}
+      @keyframes pulse{0%,100%{opacity:.7}50%{opacity:1}}
+    </style>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff9f43"/>
+    </marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a855f7"/>
+    </marker>
+  </defs>
+  <rect width="600" height="320" class="bg"/>
+
+  <text x="300" y="28" text-anchor="middle" class="title">Setpoint Tampering — Curing Oven</text>
+
+  <!-- Conveyor line -->
+  <rect x="40" y="140" width="520" height="40" rx="6" class="component"/>
+  <text x="300" y="165" text-anchor="middle" class="label">Paint line conveyor</text>
+
+  <!-- Oven -->
+  <rect x="230" y="80" width="140" height="100" rx="10" class="fault-anim"/>
+  <rect x="238" y="88" width="124" height="84" rx="8" class="panel"/>
+  <text x="300" y="118" text-anchor="middle" class="text">OVEN-04</text>
+  <text x="300" y="142" text-anchor="middle" class="fault" font-size="18" font-weight="600">240°C</text>
+  <text x="300" y="158" text-anchor="middle" class="label">Zone 1 temp</text>
+
+  <!-- PLC -->
+  <rect x="440" y="90" width="90" height="70" rx="6" class="component"/>
+  <text x="485" y="118" text-anchor="middle" class="text">PLC-PNT</text>
+  <text x="485" y="138" text-anchor="middle" class="label">EtherNet/IP</text>
+  <path d="M 370 130 L 440 130" class="line"/>
+
+  <!-- Attacker -->
+  <rect x="50" y="90" width="90" height="60" rx="6" class="component"/>
+  <text x="95" y="120" text-anchor="middle" class="text">Attacker</text>
+  <text x="95" y="140" text-anchor="middle" class="label">L2 workstation</text>
+  <path d="M 140 120 C 180 120, 180 120, 230 110" class="arrow"/>
+  <text x="185" y="105" text-anchor="middle" class="label">malicious setpoint</text>
+
+  <!-- Detection -->
+  <rect x="230" y="210" width="140" height="70" rx="8" class="detect"/>
+  <rect x="238" y="218" width="124" height="54" rx="6" class="panel"/>
+  <text x="300" y="240" text-anchor="middle" class="text">Detection</text>
+  <text x="300" y="260" text-anchor="middle" class="label">ZONE1 temp sensor</text>
+  <path d="M 300 180 L 300 210" class="detect" stroke-width="2" marker-end="url(#b)"/>
+
+  <!-- Legend -->
+  <text x="30" y="300" class="label">Impact: oven overheats past safe limit (185°C) → scorch/fire risk</text>
+</svg>
